@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,24 +22,30 @@ class _TodoGridView extends State<TodoGridView> {
   void _loadTodos() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      int length = prefs.getInt('todo_length') ?? 0;
-      _controllers.clear();
-      _checks.clear();
-      for (int i = 0; i < length; i++) {
-        _controllers
-            .add(TextEditingController(text: prefs.getString('todo_$i') ?? ''));
-        _checks.add(prefs.getBool('check_$i') ?? false);
+      String? todoListJson = prefs.getString('todo_list');
+      if (todoListJson != null) {
+        List<dynamic> todoList = jsonDecode(todoListJson);
+        _controllers.clear();
+        _checks.clear();
+        for (var item in todoList) {
+          _controllers.add(TextEditingController(text: item['index']));
+          _checks.add(item['check']);
+        }
       }
     });
   }
 
   void _saveTodos() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('todo_length', _controllers.length);
+    List<Map<String, dynamic>> todoList = [];
     for (int i = 0; i < _controllers.length; i++) {
-      await prefs.setString('todo_$i', _controllers[i].text);
-      await prefs.setBool('check_$i', _checks[i]);
+      todoList.add({
+        'index': _controllers[i].text,
+        'check': _checks[i],
+      });
     }
+    String todoListJson = jsonEncode(todoList);
+    await prefs.setString('todo_list', todoListJson);
   }
 
   void _addTodo() {
@@ -63,16 +70,10 @@ class _TodoGridView extends State<TodoGridView> {
 
   void _checkAll(bool isCheck) {
     setState(() {
-      if (isCheck) {
-        for (int i = 0; i < _controllers.length; i++) {
-          _checks[i] = true;
-        }
-      } else {
-        for (int i = 0; i < _controllers.length; i++) {
-          _checks[i] = false;
-        }
-        _saveTodos();
+      for (int i = 0; i < _controllers.length; i++) {
+        _checks[i] = isCheck;
       }
+      _saveTodos();
     });
   }
 
