@@ -125,6 +125,12 @@ class _TodoGridView extends State<TodoGridView> {
                       onChanged: (value) {
                         _saveTodos();
                       },
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        decoration: _checks[index]
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                      ),
                     ),
                   ),
                 ),
