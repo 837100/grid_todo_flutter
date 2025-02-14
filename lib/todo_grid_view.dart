@@ -11,8 +11,7 @@ class TodoGridView extends StatefulWidget {
 class _TodoGridView extends State<TodoGridView> {
   final List<TextEditingController> _controllers =
       List.generate(1, (index) => TextEditingController());
-  int _selectedIndex = -1;
-  bool _showDeleteButton = true;
+  final List<bool> _checks = List.generate(1, (index) => false);
 
   @override
   void initState() {
@@ -37,15 +36,20 @@ class _TodoGridView extends State<TodoGridView> {
   void _addTodo() {
     setState(() {
       _controllers.add(TextEditingController());
+      _checks.add(false);
     });
   }
 
   void _deleteTodo() {
     setState(() {
-      if (_selectedIndex >= 0 && _selectedIndex < _controllers.length) {
-        _controllers.removeAt(_selectedIndex);
-        _showDeleteButton = false;
-        _selectedIndex = -1;
+      for (int i = _controllers.length-1; i >= 0; i--) {
+        if (_checks[i] == true) {
+          _controllers.removeAt(i);
+          _checks.removeAt(i);
+        } 
+        else { 
+          continue;
+        }
       }
     });
   }
@@ -56,11 +60,10 @@ class _TodoGridView extends State<TodoGridView> {
       appBar: AppBar(
         title: const Text('할 일 목록'),
         actions: [
-          if (_showDeleteButton)
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: _deleteTodo,
-            ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: _deleteTodo,
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _addTodo,
@@ -80,28 +83,37 @@ class _TodoGridView extends State<TodoGridView> {
           ),
           itemCount: _controllers.length,
           itemBuilder: (context, index) {
-            return GestureDetector(
-              onLongPress: () {
-                setState(() {
-                  _showDeleteButton = true;
-                  _selectedIndex = index;
-                });
-              },
-              child: Container(
-                padding: const EdgeInsets.all(8.0),
-                color: Colors.blue,
-                child: Center(
-                  child: TextField(
-                    controller: _controllers[index],
-                    decoration: InputDecoration(
-                      labelText: '할 일 $index',
+            return Stack(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  color: Colors.blue,
+                  child: Center(
+                    child: TextField(
+                      controller: _controllers[index],
+                      decoration: InputDecoration(
+                        // labelText: '할 일 $index',
+                      ),
+                      onChanged: (value) {
+                        _saveTodo(index, value);
+                      },
                     ),
-                    onChanged: (value) {
-                      _saveTodo(index, value);
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Checkbox(
+                    value: _checks[index],
+                    onChanged: (newValue) {
+                      setState(() {
+                        debugPrint(index.toString());
+                        debugPrint(newValue.toString());
+                        _checks[index] = newValue!;
+                      });
                     },
                   ),
                 ),
-              ),
+              ],
             );
           },
         ),
