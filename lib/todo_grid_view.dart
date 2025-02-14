@@ -1,11 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class TodoGridView extends StatelessWidget {
+class TodoGridView extends StatefulWidget {
   const TodoGridView({super.key});
 
+  @override
+  State<TodoGridView> createState() => _TodoGridView();
+}
+
+class _TodoGridView extends State<TodoGridView> {
+  final List<TextEditingController> _controllers =
+      List.generate(1, (index) => TextEditingController());
+  int _selectedIndex = -1;
+  bool _showDeleteButton = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTodos();
+  }
+
+  void _loadTodos() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      for (int i = 0; i < _controllers.length; i++) {
+        _controllers[i].text = prefs.getString('todo_$i') ?? '';
+      }
+    });
+  }
+
+  void _saveTodo(int index, String value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('todo_$index', value);
+  }
+
   void _addTodo() {
-    // 할 일 추가 로직을 여기에 작성하세요.
-    debugPrint('Add Todo');
+    setState(() {
+      _controllers.add(TextEditingController());
+    });
+  }
+
+  void _deleteTodo() {
+    setState(() {
+      if (_selectedIndex >= 0 && _selectedIndex < _controllers.length) {
+        _controllers.removeAt(_selectedIndex);
+        _showDeleteButton = false;
+        _selectedIndex = -1;
+      }
+    });
   }
 
   @override
@@ -14,33 +56,50 @@ class TodoGridView extends StatelessWidget {
       appBar: AppBar(
         title: const Text('할 일 목록'),
         actions: [
+          if (_showDeleteButton)
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: _deleteTodo,
+            ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _addTodo,
-          )
-        ]
+          ),
+        ],
       ),
       body: Scrollbar(
-        thickness: 10,
-        thumbVisibility: true,
+        thickness: 5,
+        thumbVisibility: false,
         radius: const Radius.circular(5),
         child: GridView.builder(
           scrollDirection: Axis.vertical,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
+            crossAxisCount: 3,
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
           ),
-          itemCount: 30,
+          itemCount: _controllers.length,
           itemBuilder: (context, index) {
-            return InkWell(
-              onTap: () {
-                debugPrint('Item $index Tapped');
+            return GestureDetector(
+              onLongPress: () {
+                setState(() {
+                  _showDeleteButton = true;
+                  _selectedIndex = index;
+                });
               },
               child: Container(
-                color: Colors.blue[100 * (index % 9)],
+                padding: const EdgeInsets.all(8.0),
+                color: Colors.blue,
                 child: Center(
-                  child: Text('Item $index'),
+                  child: TextField(
+                    controller: _controllers[index],
+                    decoration: InputDecoration(
+                      labelText: '할 일 $index',
+                    ),
+                    onChanged: (value) {
+                      _saveTodo(index, value);
+                    },
+                  ),
                 ),
               ),
             );
