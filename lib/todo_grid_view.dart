@@ -9,9 +9,8 @@ class TodoGridView extends StatefulWidget {
 }
 
 class _TodoGridView extends State<TodoGridView> {
-  final List<TextEditingController> _controllers =
-      List.generate(30, (index) => TextEditingController());
-  final List<bool> _checks = List.generate(30, (index) => false);
+  final List<TextEditingController> _controllers = [];
+  final List<bool> _checks = [];
 
   @override
   void initState() {
@@ -23,31 +22,30 @@ class _TodoGridView extends State<TodoGridView> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       int length = prefs.getInt('todo_length') ?? 0;
+      _controllers.clear();
+      _checks.clear();
       for (int i = 0; i < length; i++) {
-        _controllers[i].text = prefs.getString('todo_$i') ?? '';
-        _checks[i] = prefs.getBool('check_$i') ?? false;
+        _controllers
+            .add(TextEditingController(text: prefs.getString('todo_$i') ?? ''));
+        _checks.add(prefs.getBool('check_$i') ?? false);
       }
     });
   }
 
-  void _saveTodo(int index, String value) async {
+  void _saveTodos() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('todo_$index', value);
-    _loadTodos();
-  }
-
-  void _saveCheck(int index, bool value) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('check_$index', value.toString());
-    _loadTodos();
+    await prefs.setInt('todo_length', _controllers.length);
+    for (int i = 0; i < _controllers.length; i++) {
+      await prefs.setString('todo_$i', _controllers[i].text);
+      await prefs.setBool('check_$i', _checks[i]);
+    }
   }
 
   void _addTodo() {
     setState(() {
-      if (_controllers.length < 30) {
-        _controllers.add(TextEditingController());
-        _checks.add(false);
-      }
+      _controllers.add(TextEditingController());
+      _checks.add(false);
+      _saveTodos();
     });
   }
 
@@ -57,11 +55,23 @@ class _TodoGridView extends State<TodoGridView> {
         if (_checks[i] == true) {
           _controllers.removeAt(i);
           _checks.removeAt(i);
-        } else {
-          _saveTodo(i, _controllers[i].toString());
-          _saveCheck(i, _checks[i]);
-          continue;
         }
+      }
+      _saveTodos();
+    });
+  }
+
+  void _checkAll(bool isCheck) {
+    setState(() {
+      if (isCheck) {
+        for (int i = 0; i < _controllers.length; i++) {
+          _checks[i] = true;
+        }
+      } else {
+        for (int i = 0; i < _controllers.length; i++) {
+          _checks[i] = false;
+        }
+        _saveTodos();
       }
     });
   }
@@ -72,6 +82,14 @@ class _TodoGridView extends State<TodoGridView> {
       appBar: AppBar(
         title: const Text('할 일 목록'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.check_box_outline_blank),
+            onPressed: () => _checkAll(false),
+          ),
+          IconButton(
+            icon: const Icon(Icons.check_box),
+            onPressed: () => _checkAll(true),
+          ),
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: _deleteTodo,
@@ -105,7 +123,7 @@ class _TodoGridView extends State<TodoGridView> {
                       controller: _controllers[index],
                       maxLines: 2,
                       onChanged: (value) {
-                        _saveTodo(index, value);
+                        _saveTodos();
                       },
                     ),
                   ),
@@ -116,9 +134,8 @@ class _TodoGridView extends State<TodoGridView> {
                     value: _checks[index],
                     onChanged: (newValue) {
                       setState(() {
-                        debugPrint(index.toString());
-                        debugPrint(newValue.toString());
                         _checks[index] = newValue!;
+                        _saveTodos();
                       });
                     },
                   ),
