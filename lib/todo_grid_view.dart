@@ -117,7 +117,7 @@ class _TodoGridView extends State<TodoGridView> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(8.0),
-                  color: Colors.blue,
+                  color: _checks[index] ? Colors.grey : Colors.blue,
                   child: Center(
                     child: TextField(
                       controller: _controllers[index],
