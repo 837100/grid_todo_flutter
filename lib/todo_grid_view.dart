@@ -91,9 +91,7 @@ class _TodoGridView extends State<TodoGridView> {
                   child: Center(
                     child: TextField(
                       controller: _controllers[index],
-                      decoration: InputDecoration(
-                        // labelText: '할 일 $index',
-                      ),
+                      maxLines:2,
                       onChanged: (value) {
                         _saveTodo(index, value);
                       },
