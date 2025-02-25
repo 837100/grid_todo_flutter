@@ -12,6 +12,7 @@ class TodoGridView extends StatefulWidget {
 class _TodoGridView extends State<TodoGridView> {
   final List<TextEditingController> _controllers = [];
   final List<bool> _checks = [];
+  int _itemSelected = 0;
 
   @override
   void initState() {
@@ -77,6 +78,12 @@ class _TodoGridView extends State<TodoGridView> {
     });
   }
 
+  void _bottomBarNavigation(int index) {
+    setState(() {
+      _itemSelected = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,6 +108,17 @@ class _TodoGridView extends State<TodoGridView> {
           ),
         ],
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: _bottomBarNavigation,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.check_circle), label: 'Todo'),
+          BottomNavigationBarItem(icon: Icon(Icons.edit_note), label: 'Diary'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings), label: 'Settings'),
+        ],
+      ),
       body: Scrollbar(
         thickness: 5,
         thumbVisibility: false,
@@ -118,7 +136,9 @@ class _TodoGridView extends State<TodoGridView> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(8.0),
-                  color: _checks[index] ? Colors.grey : const Color.fromARGB(255, 239, 231, 155),
+                  color: _checks[index]
+                      ? Colors.grey
+                      : const Color.fromARGB(255, 239, 231, 155),
                   child: Center(
                     child: TextField(
                       controller: _controllers[index],
