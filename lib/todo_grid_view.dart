@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:grid_todo_flutter/diary_page.dart';
+import 'package:grid_todo_flutter/fortune_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TodoGridView extends StatefulWidget {
@@ -12,8 +14,13 @@ class TodoGridView extends StatefulWidget {
 class _TodoGridView extends State<TodoGridView> {
   final List<TextEditingController> _controllers = [];
   final List<bool> _checks = [];
-  int _itemSelected = 0;
+  int _selectedIndex = 0;
 
+  late final List<Widget> _pages = [
+    _buildTodoPage(),
+    const DiaryPage(),
+    const FortunePage(),
+  ];
   @override
   void initState() {
     super.initState();
@@ -80,12 +87,11 @@ class _TodoGridView extends State<TodoGridView> {
 
   void _bottomBarNavigation(int index) {
     setState(() {
-      _itemSelected = index;
+      _selectedIndex = index;
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildTodoPage() {
     return Scaffold(
       appBar: AppBar(
         title: const Text('할 일 목록'),
@@ -106,17 +112,6 @@ class _TodoGridView extends State<TodoGridView> {
             icon: const Icon(Icons.add),
             onPressed: _addTodo,
           ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: _bottomBarNavigation,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.check_circle), label: 'Todo'),
-          BottomNavigationBarItem(icon: Icon(Icons.edit_note), label: 'Diary'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),
       body: Scrollbar(
@@ -171,6 +166,38 @@ class _TodoGridView extends State<TodoGridView> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        items: [
+          BottomNavigationBarItem(
+              icon: Icon(_selectedIndex == 0
+                  ? Icons.check_circle
+                  : Icons.check_circle_outline),
+              label: 'Todo'),
+          BottomNavigationBarItem(
+              icon: Icon(_selectedIndex == 1
+                  ? Icons.edit_note
+                  : Icons.edit_note_outlined),
+              label: 'Diary'),
+          BottomNavigationBarItem(
+              icon: Icon(_selectedIndex == 2
+                  ? Icons.star_purple500
+                  : Icons.star_border_purple500_outlined),
+              label: 'Fortune'),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _bottomBarNavigation,
       ),
     );
   }
