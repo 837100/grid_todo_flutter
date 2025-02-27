@@ -4,23 +4,17 @@ import 'package:grid_todo_flutter/diary_page.dart';
 import 'package:grid_todo_flutter/fortune_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class TodoGridView extends StatefulWidget {
-  const TodoGridView({super.key});
+class TodoGridPage extends StatefulWidget {
+  const TodoGridPage({super.key});
 
   @override
-  State<TodoGridView> createState() => _TodoGridView();
+  State<TodoGridPage> createState() => _TodoGridPage();
 }
 
-class _TodoGridView extends State<TodoGridView> {
+class _TodoGridPage extends State<TodoGridPage> {
   final List<TextEditingController> _controllers = [];
   final List<bool> _checks = [];
-  int _selectedIndex = 0;
 
-  late final List<Widget> _pages = [
-    _buildTodoPage(),
-    const DiaryPage(),
-    const FortunePage(),
-  ];
   @override
   void initState() {
     super.initState();
@@ -85,13 +79,8 @@ class _TodoGridView extends State<TodoGridView> {
     });
   }
 
-  void _bottomBarNavigation(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  Widget _buildTodoPage() {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('할 일 목록'),
@@ -166,38 +155,6 @@ class _TodoGridView extends State<TodoGridView> {
             );
           },
         ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-              icon: Icon(_selectedIndex == 0
-                  ? Icons.check_circle
-                  : Icons.check_circle_outline),
-              label: 'Todo'),
-          BottomNavigationBarItem(
-              icon: Icon(_selectedIndex == 1
-                  ? Icons.edit_note
-                  : Icons.edit_note_outlined),
-              label: 'Diary'),
-          BottomNavigationBarItem(
-              icon: Icon(_selectedIndex == 2
-                  ? Icons.star_purple500
-                  : Icons.star_border_purple500_outlined),
-              label: 'Fortune'),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _bottomBarNavigation,
       ),
     );
   }
