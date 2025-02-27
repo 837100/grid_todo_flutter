@@ -35,15 +35,20 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _pages = const [
     TodoGridPage(),
-    Scaffold(body: Center(child: Text('일기장'))),
+    DiaryPage(),
     FortunePage(),
   ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
+      body: Scrollbar(
+        thickness: 5,
+        thumbVisibility: false,
+        radius: const Radius.circular(5),
+        child: IndexedStack(
+          index: _selectedIndex,
+          children: _pages,
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

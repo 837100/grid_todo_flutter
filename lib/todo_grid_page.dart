@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:grid_todo_flutter/diary_page.dart';
-import 'package:grid_todo_flutter/fortune_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TodoGridPage extends StatefulWidget {
@@ -103,58 +101,53 @@ class _TodoGridPage extends State<TodoGridPage> {
           ),
         ],
       ),
-      body: Scrollbar(
-        thickness: 5,
-        thumbVisibility: false,
-        radius: const Radius.circular(5),
-        child: GridView.builder(
-          scrollDirection: Axis.vertical,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-          ),
-          itemCount: _controllers.length,
-          itemBuilder: (context, index) {
-            return Stack(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  color: _checks[index]
-                      ? Colors.grey
-                      : const Color.fromARGB(255, 239, 231, 155),
-                  child: Center(
-                    child: TextField(
-                      controller: _controllers[index],
-                      maxLines: 2,
-                      onChanged: (value) {
-                        _saveTodos();
-                      },
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        decoration: _checks[index]
-                            ? TextDecoration.lineThrough
-                            : TextDecoration.none,
-                      ),
+      body: GridView.builder(
+        scrollDirection: Axis.vertical,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        itemCount: _controllers.length,
+        itemBuilder: (context, index) {
+          return Stack(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8.0),
+                color: _checks[index]
+                    ? Colors.grey
+                    : const Color.fromARGB(255, 239, 231, 155),
+                child: Center(
+                  child: TextField(
+                    controller: _controllers[index],
+                    maxLines: 2,
+                    onChanged: (value) {
+                      _saveTodos();
+                    },
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      decoration: _checks[index]
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
                     ),
                   ),
                 ),
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Checkbox(
-                    value: _checks[index],
-                    onChanged: (newValue) {
-                      setState(() {
-                        _checks[index] = newValue!;
-                        _saveTodos();
-                      });
-                    },
-                  ),
+              ),
+              Align(
+                alignment: Alignment.topRight,
+                child: Checkbox(
+                  value: _checks[index],
+                  onChanged: (newValue) {
+                    setState(() {
+                      _checks[index] = newValue!;
+                      _saveTodos();
+                    });
+                  },
                 ),
-              ],
-            );
-          },
-        ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
