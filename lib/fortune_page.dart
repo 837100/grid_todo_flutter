@@ -151,16 +151,9 @@ class _RouletteWheelState extends State<RouletteWheel>
               // 화살표 표시
               Positioned(
                 top: 0,
-                child: Container(
-                  width: 20,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
-                    ),
-                  ),
+                child: CustomPaint(
+                  size: const Size(20, 40),
+                  painter: ArrowPainter(),
                 ),
               ),
             ],
@@ -186,6 +179,28 @@ class _RouletteWheelState extends State<RouletteWheel>
       ],
     );
   }
+}
+
+class ArrowPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.red
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    // 삼각형 그리기 - 위쪽 꼭지점부터 시작
+
+    path.moveTo(size.width / 2, 0); // 상단 중앙
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class RoulettePainter extends CustomPainter {
@@ -217,16 +232,25 @@ class RoulettePainter extends CustomPainter {
       );
 
       // 텍스트 그리기
+
+      String originalText = items[i];
+      int breakPoint = (originalText.length / 2).floor();
+      String text = originalText.substring(0, breakPoint) +
+          '\n' +
+          originalText.substring(breakPoint);
       final textPainter = TextPainter(
         text: TextSpan(
-          text: items[i],
+          text: text,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.bold,
+            height: 1.2,
           ),
         ),
         textDirection: TextDirection.ltr,
+        textAlign: TextAlign.center,
+        maxLines: 2,
       );
       textPainter.layout();
 
@@ -257,18 +281,18 @@ class FortunePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<String> items = [
       '창의력이 샘솟는 날',
-      '정리하는 날',
-      '소비하는 날',
+      '정리 하는 날',
+      '소비 하는 날',
       '행운이 따르는 날',
-      '도전하는 날',
-      '휴식하는 날',
+      '도전을 하는 날',
+      '휴식 하는 날',
       '자기계발 하는 날',
       '인연을 만나는 날',
     ];
 
     final List<Color> colors = [
-      Colors.red,
       Colors.blue,
+      Colors.greenAccent,
       Colors.green,
       Colors.yellow,
       Colors.purple,
